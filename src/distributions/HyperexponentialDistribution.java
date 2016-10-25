@@ -26,4 +26,13 @@ public class HyperexponentialDistribution implements Distribution {
         else
             return ExponentialDistribution.generate(random, means[event]);
     }
+    
+    @Override
+    public double getDF(double t, boolean cdf) {
+        double sum = 0.0;
+        for(int i = 0; i < alphas.length; i++) {
+            sum += alphas[i] * ExponentialDistribution.getDF(1.0/ means[i], t, cdf);
+        }
+        return sum;
+    }
 }

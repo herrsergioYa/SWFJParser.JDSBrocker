@@ -69,7 +69,20 @@ public class SimpleTaskInput implements TaskInput {
     public boolean has() {
         return time < Double.POSITIVE_INFINITY && (limit < 0 || count <= limit);
     }
-    
-    
-    
+
+    public double[] getWidth() {
+        return width;
+    }
+
+    public Distribution getDistribution() {
+        return input;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public int getCount() {
+        return count;
+    }
 }

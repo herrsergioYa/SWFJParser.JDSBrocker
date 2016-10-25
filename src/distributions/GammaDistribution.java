@@ -1,6 +1,7 @@
 package distributions;
 
 import java.util.Random;
+import mymath.Gamma;
 
 /**
  * Created by HerrSergio on 20.08.2016.
@@ -60,4 +61,19 @@ public class GammaDistribution implements Distribution {
     public static double getBeta(Random random, double m) {
         return getBeta(random, m, 1.0 - m);
     }
+
+    public static double getDF(double lambda, double nu, double t, boolean cdf) {
+        if(cdf) {
+            return Gamma.lower_gamma(nu, t * lambda, true);
+        } else {
+            return Math.pow(lambda, nu) * Math.pow(t, nu - 1.0) / Gamma.gamma(nu);
+        }
+    }
+    
+    @Override
+    public double getDF(double t, boolean cdf) {
+        return getDF(order / mean, order, t, cdf);
+    }
+    
+    
 }

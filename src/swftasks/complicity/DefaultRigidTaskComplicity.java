@@ -5,6 +5,8 @@
  */
 package swftasks.complicity;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 import swftasks.RigidTaskComplicity;
@@ -27,4 +29,15 @@ public class DefaultRigidTaskComplicity implements RigidTaskComplicity {
         return streams.get(key).get(random, width, square);
     }
     
+    public Map<Integer, ComplicityDistribution> getDistributions() {
+        LinkedHashMap<Integer, ComplicityDistribution> map = new LinkedHashMap<>();
+        int last = 1;
+        for(Map.Entry<Integer, ComplicityDistribution> entry : streams.entrySet()) {
+            //String key = last + "_" + entry.getKey();
+            //last = entry.getKey() + 1;
+            //map.put(key, entry.getValue());
+            map.put(entry.getKey(), entry.getValue());
+        }
+        return map;
+    }
 }

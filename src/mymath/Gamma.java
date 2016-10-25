@@ -32,39 +32,39 @@ public class Gamma {
         -1.34659959864969306392456e+5,
         -1.15132259675553483497211e+5};
 
-    public static double gamma(double val) {
-        if (val < 0) {
-            return -Math.PI / Math.sin(Math.PI * val) / gamma(-val) / val;
+    public static double gamma(double nu) {
+        if (nu < 0) {
+            return -Math.PI / Math.sin(Math.PI * nu) / gamma(-nu) / nu;
         }
 
-        if (val == 0.0) {
-            return 1.0 / val;
+        if (nu == 0.0) {
+            return 1.0 / nu;
         }
 
-        if (val >= Double.POSITIVE_INFINITY) {
+        if (nu >= Double.POSITIVE_INFINITY) {
             return Double.POSITIVE_INFINITY;
         }
 
-        if (val <= Double.NEGATIVE_INFINITY) {
+        if (nu <= Double.NEGATIVE_INFINITY) {
             return Double.NaN;
         }
 
         double mult = 1.0;
 
-        while (val > 2) {
-            val -= 1.0;
-            mult *= val;
+        while (nu > 2) {
+            nu -= 1.0;
+            mult *= nu;
         }
 
-        if (val < 1) {
-            mult /= val;
-            val += 1;
+        if (nu < 1) {
+            mult /= nu;
+            nu += 1;
         }
 
         double a = 0.0;
         double b = 1.0;
 
-        double z = val - 1.0;
+        double z = nu - 1.0;
 
         for (int i = 0; i < 8; i++) {
             a = (a + p[i]) * z;
@@ -75,39 +75,39 @@ public class Gamma {
 
     }
 
-    public static double loggamma(double val) {
-        if (val < 0) {
-            return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * val))) - loggamma(-val) - Math.log(-val);
+    public static double loggamma(double nu) {
+        if (nu < 0) {
+            return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * nu))) - loggamma(-nu) - Math.log(-nu);
         }
 
-        if (val == 0.0) {
-            return 1.0 / val;
+        if (nu == 0.0) {
+            return 1.0 / nu;
         }
 
-        if (val >= Double.POSITIVE_INFINITY) {
+        if (nu >= Double.POSITIVE_INFINITY) {
             return Double.POSITIVE_INFINITY;
         }
 
-        if (val <= Double.NEGATIVE_INFINITY) {
+        if (nu <= Double.NEGATIVE_INFINITY) {
             return Double.NaN;
         }
 
         double addititon = 0.0;
 
-        while (val > 2) {
-            val -= 1.0;
-            addititon += Math.log(val);
+        while (nu > 2) {
+            nu -= 1.0;
+            addititon += Math.log(nu);
         }
 
-        if (val < 1) {
-            addititon -= Math.log(val);
-            val += 1.0;
+        if (nu < 1) {
+            addititon -= Math.log(nu);
+            nu += 1.0;
         }
 
         double a = 0.0;
         double b = 1.0;
 
-        double z = val - 1.0;
+        double z = nu - 1.0;
 
         for (int i = 0; i < 8; i++) {
             a = (a + p[i]) * z;
@@ -118,20 +118,20 @@ public class Gamma {
 
     }
     
-    public static double digamma(double x) {
+    public static double digamma(double nu) {
         
-        if(x < 0) {
-            return digamma(1.0 - x) - Math.PI * Math.cos(Math.PI * x) / Math.sin(Math.PI * x);
+        if(nu < 0) {
+            return digamma(1.0 - nu) - Math.PI * Math.cos(Math.PI * nu) / Math.sin(Math.PI * nu);
         }
         
         double sub = 0.0;
 
-        while (x < 7) {
-            sub += 1 / x;
-            x += 1;
+        while (nu < 7) {
+            sub += 1 / nu;
+            nu += 1;
         }
 
-        double x1 = 1 / x;
+        double x1 = 1 / nu;
         double x2 = x1 * x1;
         double x4 = x2 * x2;
         double x6 = x4 * x2;
@@ -140,9 +140,27 @@ public class Gamma {
         double x12 = x8 * x4;
         double x14 = x8 * x6;
 
-        return Math.log(x) - 1.0 / 2.0 * x1 - 1.0 / 12 * x2 + 1.0 / 120 * x4
+        return Math.log(nu) - 1.0 / 2.0 * x1 - 1.0 / 12 * x2 + 1.0 / 120 * x4
                 - 1.0 / 252 * x6 + 1.0 / 240 * x8 - 5.0 / 660 * x10 + 691.0 / 32760 * x12 - 1.0 / 12 * x14
                 - sub;
 
+    }
+    
+    public static double lower_gamma(double nu, double x, boolean norm) {
+        if(nu <= 0)
+            throw new IllegalArgumentException();
+        double denom = nu, nom = 1.0;
+        if(norm)
+            denom *= gamma(nu);
+        double sum = 0.0;
+        for(int i = 0;;) {
+            double buf = sum;
+            sum += nom / denom;
+            if(buf == sum)
+                break;
+            nom *= x;
+            denom *= ++i + nu;
+        }
+        return Math.pow(x, nu) * Math.exp(-x) * sum;
     }
 }

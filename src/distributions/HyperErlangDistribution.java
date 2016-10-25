@@ -31,4 +31,12 @@ public class HyperErlangDistribution implements Distribution {
         return generate(random, alphas, means, orders);
     }
 
+    @Override
+    public double getDF(double t, boolean cdf) {
+        double sum = 0.0;
+        for(int i = 0; i < alphas.length; i++) {
+            sum += alphas[i] * GammaDistribution.getDF(orders[i] / means[i], orders[i], t, cdf);
+        }
+        return sum;
+    }
 }

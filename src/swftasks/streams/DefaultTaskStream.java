@@ -49,5 +49,12 @@ public class DefaultTaskStream implements TaskStream {
             info = null;
         }
     }
-    
+
+    public TaskInput getInput() {
+        return input;
+    }
+
+    public TaskComplicity getComplicity() {
+        return complicity;
+    }    
 }

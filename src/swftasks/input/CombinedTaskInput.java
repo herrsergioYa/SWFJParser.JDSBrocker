@@ -8,9 +8,11 @@ package swftasks.input;
 import swftasks.TaskInput;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.Set;
 
 /**
  *
@@ -82,5 +84,14 @@ public class CombinedTaskInput implements TaskInput {
             return true;
         }
         return false;
+    }
+    
+    public List<TaskInput> getTaskInputs() {
+        List<TaskInput> set = new ArrayList<>();
+        if(inputs != null)
+            set.addAll(inputs);
+        if(buf != null)
+            set.addAll(buf);
+        return set;
     }
 }

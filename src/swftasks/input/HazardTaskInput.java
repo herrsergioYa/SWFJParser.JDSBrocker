@@ -50,7 +50,8 @@ public class HazardTaskInput implements TaskInput {
     public boolean has() {
         return input.has();
     }
-    
-    
-    
+
+    public TaskInput getInput() {
+        return input;
+    }    
 }

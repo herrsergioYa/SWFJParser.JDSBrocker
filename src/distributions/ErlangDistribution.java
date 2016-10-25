@@ -35,4 +35,10 @@ public class ErlangDistribution implements Distribution {
 
         return value / order;
     }
+
+    @Override
+    public double getDF(double t, boolean cdf) {
+        return GammaDistribution.getDF(order / mean, order, t, cdf);
+    }
+    
 }

@@ -42,6 +42,18 @@ public class LimitedTaskInput implements TaskInput {
     public boolean has() {
         return (limit < 0 || count <= limit) && taskInput.has();
     }
+
+    public TaskInput getTaskInput() {
+        return taskInput;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public int getCount() {
+        return count;
+    }
     
     
     

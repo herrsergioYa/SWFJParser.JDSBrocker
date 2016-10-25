@@ -21,4 +21,18 @@ public class ExponentialDistribution implements Distribution {
         return - mean * Math.log(1.0 - random.nextDouble());
     }
 
+    public static double getDF(double lambda, double t, boolean cdf) {
+        if(cdf) {
+            return 1.0 - Math.exp(- t * lambda);
+        } else {
+            return Math.exp(- t * lambda) * lambda;
+        }
+    }
+    
+    @Override
+    public double getDF(double t, boolean cdf) {
+       return getDF(1.0 / mean, t, cdf);
+    }
+
+    
 }

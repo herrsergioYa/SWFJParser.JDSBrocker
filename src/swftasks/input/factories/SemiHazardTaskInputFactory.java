@@ -5,7 +5,6 @@
  */
 package swftasks.input.factories;
 
-import java.util.Arrays;
 import mymath.DistributionFactory;
 import swfjparser.GWFFile;
 import swftasks.input.HazardTaskInput;

@@ -17,4 +17,11 @@ public class Markovian implements Distribution {
     public double next(Random random) {
         return - e * Math.log(1.0 - random.nextDouble());
     }
+
+    @Override
+    public double getDF(double t, boolean cdf) {
+        return ExponentialDistribution.getDF(1.0 / e, t, cdf);
+    }
+    
+    
 }

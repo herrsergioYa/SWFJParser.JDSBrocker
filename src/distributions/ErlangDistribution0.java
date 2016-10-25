@@ -23,4 +23,8 @@ public class ErlangDistribution0 implements Distribution {
         return ErlangDistribution.generate(random, mean, order + 1);
     }
 
+    @Override
+    public double getDF(double t, boolean cdf) {
+        return GammaDistribution.getDF((order + 1) / mean, order + 1, t, cdf);
+    }
 }

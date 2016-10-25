@@ -54,15 +54,18 @@ public class SWFFile extends GWFFile {
         return data.get(row)[column];
     }
     
+    @Override
     public double getTime(int row) {
         return get(row, 1);
     }
     
         
+    @Override
     public int getWidth(int row) {
         return (int)Math.round(get(row, 4));
     }
     
+    @Override
     public double getLength(int row) {
         return get(row, 3);
     }
@@ -71,6 +74,7 @@ public class SWFFile extends GWFFile {
         return getLength(row) * getWidth(row);
     }
     
+    @Override
     public int getRowCount() {
         return data.size();
     }

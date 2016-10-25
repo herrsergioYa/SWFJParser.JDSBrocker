@@ -30,6 +30,7 @@ public abstract class AbstractMoldableTaskComplicity implements TaskComplicity {
         this(taskComplicity, 1, Integer.MAX_VALUE);
     }
 
+    @Override
     public abstract Task get(double incomeTime, int category, Random random);
 
 
@@ -48,4 +49,9 @@ public abstract class AbstractMoldableTaskComplicity implements TaskComplicity {
     public int getMinWidth() {
         return minWidth;
     }
+
+    public RigidTaskComplicity getTaskComplicity() {
+        return taskComplicity;
+    }
+    
 }

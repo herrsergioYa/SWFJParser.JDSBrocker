@@ -18,4 +18,14 @@ public class ConstantDistribution implements Distribution {
         return value;
     }
 
+    @Override
+    public double getDF(double t, boolean cdf) {
+        if(cdf) {
+            return t > value ? 1 : 0;
+        } else {
+            return t == value ? Double.POSITIVE_INFINITY : 0.0;
+        }
+    }
+
+    
 }
