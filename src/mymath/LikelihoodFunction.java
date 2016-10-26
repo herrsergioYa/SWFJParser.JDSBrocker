@@ -17,5 +17,5 @@ public interface LikelihoodFunction extends Function {
     Distribution getDistribution(double[] ars);
     double[][] getStartStep();
     double[] getData();
-    void setData(double[] data);
+    LikelihoodFunction initData(double[] data);
 }

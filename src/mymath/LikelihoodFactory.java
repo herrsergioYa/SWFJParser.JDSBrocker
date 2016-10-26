@@ -35,15 +35,10 @@ public class LikelihoodFactory implements DistributionFactory {
 
     @Override
     public Distribution get(double[] datas) {
-        double[] oldData = function.getData();
-        try {
-            function.setData(datas);
-            double[][] startStep = function.getStartStep();
-            double[] d = HookeJeeves.minimize(function, startStep[0], startStep[1], (int)Math.round(startStep[2][0]));
-            return function.getDistribution(d);
-        } finally {
-            function.setData(oldData);
-        }
+        LikelihoodFunction function = this.function.initData(datas);
+        double[][] startStep = function.getStartStep();
+        double[] d = HookeJeeves.minimize(function, startStep[0], startStep[1], (int) Math.round(startStep[2][0]));
+        return function.getDistribution(d);
     }
 
 }

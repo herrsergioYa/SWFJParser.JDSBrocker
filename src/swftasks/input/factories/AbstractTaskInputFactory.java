@@ -63,4 +63,13 @@ public abstract class AbstractTaskInputFactory implements TaskInputFactory {
             return new CombinedTaskInput(inputs.toArray(new TaskInput[inputs.size()]));
         }
     }    
+
+    TreeSet<Integer> getWidth() {
+        return width;
+    }
+
+    DistributionFactory getFactory() {
+        return factory;
+    }   
+    
 }

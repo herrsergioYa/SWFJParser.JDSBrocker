@@ -53,5 +53,15 @@ public abstract class AbstractRigidTaskComplicityFactory implements RigidTaskCom
     }
 
     protected abstract ComplicityDistribution extract(GWFFile file, int minWidth, int maxWidth, DistributionFactory factory);
+
+    TreeSet<Integer> getWidths() {
+        return widths;
+    }
+
+    DistributionFactory getFactory() {
+        return factory;
+    }
+    
+    
     
 }

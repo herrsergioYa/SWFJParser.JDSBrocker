@@ -7,6 +7,7 @@ package swftasks.streams.factories;
 
 import swftasks.TaskStreamFactory;
 import swfjparser.GWFFile;
+import swftasks.ParallelFactory;
 import swftasks.TaskInputFactory;
 import swftasks.streams.DefaultTaskStream;
 import swftasks.TaskStream;
@@ -29,6 +30,10 @@ public class DefaultTaskStreamFactory implements TaskStreamFactory {
         
     @Override
     public DefaultTaskStream get(GWFFile file) {
+        if(taskInputFactory instanceof ParallelFactory)
+            ((ParallelFactory)taskInputFactory).beginGet(file);
+        if(taskComplicityFactory instanceof ParallelFactory)
+            ((ParallelFactory)taskComplicityFactory).beginGet(file);
         return new DefaultTaskStream(taskInputFactory.get(file), taskComplicityFactory.get(file));
     }
     

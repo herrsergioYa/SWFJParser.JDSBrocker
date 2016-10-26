@@ -24,8 +24,7 @@ public class Approx {
     }
 
     public static double[] hyperGamma(double[] data, int branchesCount) {
-        HyperGammaLikelihoodFunction func = new HyperGammaLikelihoodFunction(branchesCount);
-        func.setData(data);
+        HyperGammaLikelihoodFunction func = new HyperGammaLikelihoodFunction(branchesCount).initData(data);
         double[] start = new double[func.argsCount()];
         double[] step = new double[func.argsCount()];
         double mean = Statistic.getMean(data);
@@ -80,20 +79,31 @@ public class Approx {
     public static class HyperGammaLikelihoodFunction implements LikelihoodFunction {
 
         private double[] data;
-        private int branchesCount;
+        private int branchesCount, count;
 
-        public HyperGammaLikelihoodFunction(int branchesCount) {
+        public HyperGammaLikelihoodFunction(int branchesCount, int count) {
             this.branchesCount = branchesCount;
+            this.count = count;
         }
+         
+        public HyperGammaLikelihoodFunction(int branchesCount) {
+            this(branchesCount, 24);
+        }
+            
 
+        protected HyperGammaLikelihoodFunction(HyperGammaLikelihoodFunction function, double[] data) {
+            this(function.branchesCount, function.count);
+            this.data = data; 
+        }
+        
         @Override
         public double[] getData() {
             return data;
         }
 
         @Override
-        public void setData(double[] data) {
-            this.data = data;
+        public HyperGammaLikelihoodFunction initData(double[] data) {
+            return new HyperGammaLikelihoodFunction(this, data);
         }
         
         @Override
@@ -151,8 +161,7 @@ public class Approx {
                 start[i] = 1.0 / branchesCount;
                 step[i] = start[i] / 100.0;
             }
-            return new double[][] {start, step, new double[] {24}};
+            return new double[][] {start, step, new double[] {count}};
         }
-
     }
 }
