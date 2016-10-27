@@ -7,6 +7,7 @@ package mymath;
 
 import distributions.Distribution;
 import distributions.HyperGammaDistribution;
+import distributions.HyperexponentialDistribution;
 import hooke_jeeves.Function;
 import hooke_jeeves.HookeJeeves;
 import java.util.Arrays;
@@ -51,6 +52,11 @@ public class Approx {
         //lambda *= order; 
         return Math.pow(lambda, order) * Math.pow(t, order - 1) * Math.exp(-t * lambda) / Gamma.gamma(order);
     }
+    
+    public static double exponentialPdf(double t, double lambda) {
+        //lambda *= order; 
+        return lambda * Math.exp(-t * lambda);
+    }
 
     private static double hyperGammaPdf(double t, double[] values) {
         if (t < 0) {
@@ -70,6 +76,28 @@ public class Approx {
                 return 0.0;
             }
             sum += gammaPdf(t, values[i], values[count + i]) * prop;
+        }
+        return sum;
+    }
+    
+    private static double hyperexponentialPdf(double t, double[] values) {
+        if (t < 0) {
+            return 0.0;
+        }
+        int count = (values.length + 1) / 2;
+        double sum = 0.0, sub = 1.0;
+        for (int i = 0; i < count; i++) {
+            double prop;
+            if (i == count - 1) {
+                prop = sub;
+            } else {
+                prop = values[count + i];
+                sub -= prop;
+            }
+            if (sub < 0.0 || prop < 0.0 || prop > 1.0 || values[i] <= 0.0) {
+                return 0.0;
+            }
+            sum += exponentialPdf(t, values[i]) * prop;
         }
         return sum;
     }
@@ -158,6 +186,95 @@ public class Approx {
                 step[i] = 0.1;
             }
             for (int i = branchesCount * 2; i < branchesCount * 3 - 1; i++) {
+                start[i] = 1.0 / branchesCount;
+                step[i] = start[i] / 100.0;
+            }
+            return new double[][] {start, step, new double[] {count}};
+        }
+    }
+    
+    public static class HyperexponentialLikelihoodFunction implements LikelihoodFunction {
+
+        private double[] data;
+        private int branchesCount, count;
+
+        public HyperexponentialLikelihoodFunction(int branchesCount, int count) {
+            this.branchesCount = branchesCount;
+            this.count = count;
+        }
+         
+        public HyperexponentialLikelihoodFunction(int branchesCount) {
+            this(branchesCount, 24);
+        }
+            
+
+        protected HyperexponentialLikelihoodFunction(HyperexponentialLikelihoodFunction function, double[] data) {
+            this(function.branchesCount, function.count);
+            this.data = data; 
+        }
+        
+        @Override
+        public double[] getData() {
+            return data;
+        }
+
+        @Override
+        public HyperexponentialLikelihoodFunction initData(double[] data) {
+            return new HyperexponentialLikelihoodFunction(this, data);
+        }
+        
+        @Override
+        public double get(double[] args) {
+            double sum = 0.0;
+            for (int i = 0; i < data.length; i++) {
+                double d = Math.max(MIN_VALUE, data[i]);
+                sum += Math.log(hyperexponentialPdf(d, args));
+            }
+            return -sum;
+        }
+
+        @Override
+        public int argsCount() {
+            return branchesCount * 2 - 1;
+        }
+
+        @Override
+        public Distribution getDistribution(double[] ars) {
+            int count = (ars.length + 1) / 2;
+            double alphas[] = new double[count];
+            double means[] = new double[count];
+            //double orders[] = new double[count];
+            double sub = 1.0;
+            for(int i = 0; i < count; i++) {
+                if(i != count - 1) {
+                    sub -= ars[count + i];
+                    alphas[i] = ars[count + i];
+                } else {
+                    alphas[i] = sub;
+                }
+                //orders[i] = ars[count + i];
+                means[i] = 1.0 / ars[i];
+            }
+            return new HyperexponentialDistribution(alphas, means);
+        }
+
+        @Override
+        public double[][] getStartStep() {
+            double[] start = new double[argsCount()];
+            double[] step = new double[argsCount()];
+            double mean = Statistic.getMean(data);
+                    //Arrays.stream(data).mapToObj((e) -> (Double) e).collect(Collectors.toList()));
+            for (int i = 0; i < branchesCount; i++) {
+                start[i] = 1.0 / mean;
+                step[i] = start[i] / 100.0;
+                start[i] = 0.01 / mean;
+                step[i] = start[i] / 10.0;
+            }
+            /*for (int i = branchesCount; i < branchesCount * 2; i++) {
+                start[i] = 1.0;
+                step[i] = 0.1;
+            }*/
+            for (int i = branchesCount; i < branchesCount * 2 - 1; i++) {
                 start[i] = 1.0 / branchesCount;
                 step[i] = start[i] / 100.0;
             }

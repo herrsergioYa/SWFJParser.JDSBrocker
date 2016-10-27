@@ -106,10 +106,11 @@ public class Analyzer {
         return h;
     }
     
-    public static SimpleTaskInput getSimpleTaskInput(Collection<SimpleTaskInput> inputs, int maxWidth) {
+    public static SimpleTaskInput getSimpleTaskInput(Collection<SimpleTaskInput> inputs, int minWidth, int maxWidth) {
         maxWidth ++;
+        minWidth ++;
         for(SimpleTaskInput input : inputs)
-            if(input.getWidth().length == maxWidth)
+            if(input.getWidth().length >= minWidth && input.getWidth().length <= maxWidth)
                 return input;
         return null;
     }
@@ -131,8 +132,8 @@ public class Analyzer {
                 
     }
     
-    public static SimpleTaskInput getSimpleFromHazardTaskInputs(TaskInput input, int maxWidth) {
-        return getSimpleTaskInput(getSimpleFromHazardTaskInputs(input), maxWidth);
+    public static SimpleTaskInput getSimpleFromHazardTaskInputs(TaskInput input, int minWidth, int maxWidth) {
+        return getSimpleTaskInput(getSimpleFromHazardTaskInputs(input), minWidth, maxWidth);
     }
     
     public static List<SimpleTaskInput> getSimpleTaskInputs(TaskInput input) {
@@ -143,8 +144,8 @@ public class Analyzer {
         }        
     }
     
-    public static SimpleTaskInput getSimpleTaskInputs(TaskInput input, int maxWidth) {
-        return getSimpleTaskInput(getSimpleTaskInputs(input), maxWidth);
+    public static SimpleTaskInput getSimpleTaskInputs(TaskInput input, int minWidth, int maxWidth) {
+        return getSimpleTaskInput(getSimpleTaskInputs(input), minWidth, maxWidth);
     }
     
     public static List<SimpleTaskInput> getBothTaskInputs(TaskInput input) {
@@ -166,8 +167,8 @@ public class Analyzer {
         return arr;
     }
     
-    public static SimpleTaskInput getBothTaskInputs(TaskInput input, int maxWidth) {
-        return getSimpleTaskInput(getBothTaskInputs(input), maxWidth);
+    public static SimpleTaskInput getBothTaskInputs(TaskInput input, int minWidth, int maxWidth) {
+        return getSimpleTaskInput(getBothTaskInputs(input), minWidth, maxWidth);
     }
     
     public static Map<Integer, ComplicityDistribution> getRigidTaskComplicityDistribution(TaskComplicity complicity) {
@@ -176,13 +177,23 @@ public class Analyzer {
     
     public static double[][] compareInputs(double[] d, TaskInput input,
             int minWidth, int maxWidth, double len, int count, boolean cdf) {
-        Distribution distr = getBothTaskInputs(input, maxWidth).getDistribution();
+        Distribution distr = getBothTaskInputs(input, minWidth, maxWidth).getDistribution();
         return  Analyzer.compare(d, len, count, cdf, distr);
     }
     
-     public static double[][] compareComplicity(double[] d, TaskComplicity complicity,
+    public static double[][] compareComplicity(double[] d, TaskComplicity complicity,
             int minWidth, int maxWidth, double len, int count, boolean cdf) {
         Distribution distr = getRigidTaskComplicityDistribution(complicity).get(maxWidth).getDistribution();
         return Analyzer.compare(d, len, count, cdf, distr);
     }
+     
+    public static int[] widths() {
+        int[] r = new int[61];
+        for(int i = 1; i < 31; i++) {
+            r[(i - 1) << 1] = (1 << i) - 1;
+            r[((i - 1) << 1) | 1] = 1 << i;
+        }
+        r[60] = Integer.MAX_VALUE;
+        return r;
+    } 
 }

@@ -43,8 +43,11 @@ import swftasks.streams.DefaultFastTaskStreamFactory;
 import swftasks.streams.DefaultTaskStream;
 import swftasks.streams.factories.DefaultTaskStreamFactory;
 import static swfjparser.Analyzer.*;
+import swftasks.complicity.factories.DeterministicTaskComplicityFactory;
 import swftasks.complicity.factories.ParallelRigidTaskComplicityFactory;
+import swftasks.input.factories.DeterministicTaskInputFactory;
 import swftasks.input.factories.ParallelTaskInputFactory;
+import swftasks.input.factories.SimpleTaskInputFactory;
 
 /**
  *
@@ -58,62 +61,107 @@ public class SWFJParser {
     public static void main(String[] args) throws ClassNotFoundException, IOException {
         // TODO code application logic here
 
+        DistributionFactory distrFactories[] = {
+            new MarkovianFactory(), //0
+            new GammaMomentumFactory(), //1
+            new GammaLikelihoodFactory(), //2
+            new LikelihoodFactory(new Approx.HyperexponentialLikelihoodFunction(3, 7)), //3
+            new LikelihoodFactory(new Approx.HyperGammaLikelihoodFunction(2, 7)) //4
+        };
+        String distrsFctoryNames[] = {
+            "M", "Gm", "Gl", "H3", "HG2"
+        };
+
+        boolean haz = true, sqr = haz;
+        int idist = 0;
+        String dist = distrsFctoryNames[idist];
+        String fname = "CTC-SP2-1995-2";
+        String iname = fname + "." + dist + (haz ? "haz" : "smp");
+        String oname = fname + "." + dist + (sqr ? "sqr" : "len");
+
+        iname = fname + ".Di" + (haz ? "haz" : "smp");;
+        oname = fname + ".Dc" + (sqr ? "sqr" : "len");
+
         SWFFile fFile = null;
-        try (Reader reader = new FileReader("CTC-SP2-1995-2.swf")) {
+        try (Reader reader = new FileReader(fname + ".swf")) {
             //"1.swf")) {
             fFile = SWFFile.load(reader);
         }
 
-        int[] widths = {1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 127, 128, 255, 256, 511, 512, 1023, 1024};
+        int[] widths
+                = //{Integer.MAX_VALUE};
+                Analyzer.widths();// {1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 127, 128, 255, 256, 511, 512, 1023, 1024};
 
-        DistributionFactory factory
-                = //new GammaMomentumFactory();
-                // new MarkovianFactory();
-                //new GammaLikelihoodFactory();
-          new LikelihoodFactory(new Approx.HyperGammaLikelihoodFunction(2, 7));
+        DistributionFactory factory = distrFactories[idist];
 
         ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        
-        TaskInputFactory tif = new ParallelTaskInputFactory(service, 
-                        new HazardTaskInputFactory(factory, widths)
-        );
-        TaskComplicityFactory tcf= new ParallelRigidTaskComplicityFactory(service, 
-                        new SquareTaskComplicityFactory(factory, widths)
-                );
-        Random random = new Random(0);
+        try {
+            TaskInputFactory tif = new ParallelTaskInputFactory(service,
+                    /*!haz ?
+                new SimpleTaskInputFactory(factory, widths) :
+                new HazardTaskInputFactory(factory, widths)*/
+                    new DeterministicTaskInputFactory(haz, 3600 * 24 * 7, widths)
+            );
+            TaskComplicityFactory tcf = new ParallelRigidTaskComplicityFactory(service,
+                    /*!sqr ?
+                new LengthTaskComplicityFactory(factory, widths) :
+                new SquareTaskComplicityFactory(factory, widths)*/
+                    new DeterministicTaskComplicityFactory(sqr, widths)
+            );
+            Random random = new Random(0);
 
-        DefaultTaskStreamFactory tsf = new DefaultTaskStreamFactory(tif, tcf);
+            DefaultTaskStreamFactory tsf = new DefaultTaskStreamFactory(tif, tcf);
 
-        FastTaskStreamFactory<DefaultTaskStream> ftsf = new DefaultFastTaskStreamFactory<>(tsf.get(fFile));
+            FastTaskStreamFactory<DefaultTaskStream> ftsf = new DefaultFastTaskStreamFactory<>(tsf.get(fFile));
 
-       
-        DefaultTaskStream dts = ftsf.get();
+            DefaultTaskStream dts = ftsf.get();
 
-        double len = 100000;
-        int count = 100;
-        int minWidth = 5, maxWidth = 7;
-        boolean cdf = true;
-        double[] d = fFile.getWeights(true, minWidth, maxWidth)[1];
-        double[][] h = compareInputs(d, dts.getInput(), minWidth, maxWidth, len, count, true);
-        IOHelper.write(Analyzer.toCsv(h), "1.csv");
-        double[] d2 = fFile.getSquares(minWidth, maxWidth);
-        double[][] h2 = compareComplicity(d2, dts.getComplicity(), minWidth, maxWidth, len, count, cdf);
-        IOHelper.write(Analyzer.toCsv(h2), "2.csv");
+            IOHelper.serialize(dts.getInput(), iname);
+            IOHelper.serialize(dts.getComplicity(), oname);
 
-        DefaultTaskStream ts = ftsf.get();
-        ts.next(random);
-        Task task = ts.get();
-        double cnt = 1_000_000;
-        CustomSWFFile cswff = new CustomSWFFile();
-        for (int i = 0; i < cnt; i++) {
-            cswff.add(task.toRigidTask(random));
-            //System.out.println(task.getIncomeTime() + " - " + task.getMinWidth() + "..." + task.getMaxWidth() + " => " + task.getLength(task.getMinWidth()) + "..." + task.getLength(task.getMaxWidth()));
-            ts.next(random);
-            task = ts.get();
+            /*for (int i = 0, last = 0; i < widths.length; last = widths[i++]) {
+                double len = 1_000_000;
+                int count = 100_000;
+                int minWidth = last + 1, maxWidth = widths[i];
+                boolean cdf = true;
+                double[] d = !haz
+                        ? fFile.getIntervals(minWidth, maxWidth)
+                        : fFile.getWeights(true, minWidth, maxWidth)[1];
+                if (d.length == 0) {
+                    continue;
+                }
+                double[][] h = compareInputs(d, dts.getInput(), minWidth, maxWidth, len, count, true);
+                IOHelper.write(Analyzer.toCsv(h), iname + "_" + minWidth + "_" + maxWidth + ".csv");
+                double[] d2 = sqr
+                        ? fFile.getSquares(minWidth, maxWidth)
+                        : fFile.getLengths(minWidth, maxWidth);
+                if (d2.length == 0) {
+                    continue;
+                }
+                double[][] h2 = compareComplicity(d2, dts.getComplicity(), minWidth, maxWidth, len, count, cdf);
+                IOHelper.write(Analyzer.toCsv(h2), oname + "_" + minWidth + "_" + maxWidth + ".csv");
+            }*/
+
+            //service.shutdown();
+
+            DefaultTaskStream ts = ftsf.get();
+            
+            double cnt = 1_000_000;
+            CustomSWFFile cswff = new CustomSWFFile();
+            for (int i = 0; i < cnt; i++) {
+                ts.next(random);
+                Task task = ts.get();
+                cswff.add(task.toRigidTask(random));
+                //System.out.println(task.getIncomeTime() + " - " + task.getMinWidth() + "..." + task.getMaxWidth() + " => " + task.getLength(task.getMinWidth()) + "..." + task.getLength(task.getMaxWidth()));
+                //ts.next(random);
+                //task = ts.get();
+            }
+
+            IOHelper.write(cswff.toString(), "generated.swf");
+            //System.err.println(task.getIncomeTime() / (cnt + 1));
+        } finally {
+            service.shutdown();
         }
-
-        IOHelper.write(cswff.toString(), "generated.swf");
-        System.err.println(task.getIncomeTime() / (cnt + 1));
     }
 
 }

@@ -145,8 +145,28 @@ public abstract class GWFFile {
         return Arrays.copyOf(values, j);
     }
 
+    public double[][] getIncome(double shift, int minWidth, int maxWidth) {
+        double[][] values = new double[getRowCount()][4];
+        int j = 0;
+        for (int i = 0; i < getRowCount(); i++) {
+            double buf = getIncomeTime(i, shift);
+            int width = getWidth(i);
+            if(width < minWidth || width > maxWidth)
+                continue;
+            values[j][0] = buf;
+            values[j][1] = width;
+            values[j][2] = getLength(i);
+            values[j][3] = getSquare(i);
+            j++;
+        }
+        return Arrays.copyOf(values, j);
+    }
+    
     public double[] getIncomeTimes(int minWidth, int maxWidth) {
         return getIncomeTimes(getShift(), minWidth, maxWidth);
+    }
+    public double[][] getIncome(int minWidth, int maxWidth) {
+        return GWFFile.this.getIncome(getShift(), minWidth, maxWidth);
     }
 
     public double[] getLengths(int minWidth, int maxWidth) {
@@ -204,6 +224,14 @@ public abstract class GWFFile {
 
     public double[] getIncomeTimes() {
         return getIncomeTimes(getShift());
+    }
+    
+    public double[][] getIncome(double shift) {
+        return GWFFile.this.getIncome(shift, 0, Integer.MAX_VALUE);
+    }
+
+    public double[][] getIncome() {
+        return getIncome(getShift());
     }
 
     public double[] getLengths() {

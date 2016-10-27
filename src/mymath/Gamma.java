@@ -153,7 +153,7 @@ public class Gamma {
         if(norm)
             denom *= gamma(nu);
         double sum = 0.0;
-        for(int i = 0;;) {
+        for(int i = 0; Double.isFinite(sum) ;) {
             double buf = sum;
             sum += nom / denom;
             if(buf == sum)
