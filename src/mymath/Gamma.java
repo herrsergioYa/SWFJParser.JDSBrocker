@@ -52,11 +52,15 @@ public class Gamma {
         double mult = 1.0;
 
         while (nu > 2) {
+            if(Double.isInfinite(mult) || mult == 0.0)
+                return mult;
             nu -= 1.0;
             mult *= nu;
         }
 
         if (nu < 1) {
+            if(Double.isInfinite(mult) || mult == 0.0)
+                return mult;
             mult /= nu;
             nu += 1;
         }
@@ -92,15 +96,19 @@ public class Gamma {
             return Double.NaN;
         }
 
-        double addititon = 0.0;
+        double addition = 0.0;
 
         while (nu > 2) {
+            if(Double.isInfinite(addition))
+                return addition;
             nu -= 1.0;
-            addititon += Math.log(nu);
+            addition += Math.log(nu);
         }
 
         if (nu < 1) {
-            addititon -= Math.log(nu);
+            if(Double.isInfinite(addition))
+                return addition;
+            addition -= Math.log(nu);
             nu += 1.0;
         }
 
@@ -114,7 +122,7 @@ public class Gamma {
             b = b * z + q[i];
         }
 
-        return Math.log(a / b + 1.0) + addititon;
+        return Math.log(a / b + 1.0) + addition;
 
     }
     

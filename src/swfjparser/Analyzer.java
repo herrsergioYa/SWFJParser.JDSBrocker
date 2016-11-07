@@ -107,10 +107,10 @@ public class Analyzer {
     }
     
     public static SimpleTaskInput getSimpleTaskInput(Collection<SimpleTaskInput> inputs, int minWidth, int maxWidth) {
-        maxWidth ++;
-        minWidth ++;
+        //maxWidth ++;
+        //minWidth ++;
         for(SimpleTaskInput input : inputs)
-            if(input.getWidth().length >= minWidth && input.getWidth().length <= maxWidth)
+            if(input.getWidth().length-1 >= minWidth && input.getWidth().length-1 <= maxWidth)
                 return input;
         return null;
     }

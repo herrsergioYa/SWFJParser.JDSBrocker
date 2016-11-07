@@ -33,12 +33,20 @@ public class SWFFile extends GWFFile {
                 if(row.length() == 0 || row.charAt(0) == ';')
                     continue;
                 String[] cells = row.split("\\s+");
-                double[] datas = Arrays.stream(cells).mapToDouble(e -> Double.parseDouble(e)).toArray();
+                double[] datas = Arrays.stream(cells).mapToDouble(e -> parseDouble(e)).toArray();
                 if(datas.length < minSize || !isOk(datas))
                     continue;
                 data.add(datas);
             }
             return new SWFFile(data);
+        }
+    }
+    
+    private static double parseDouble(String e) {
+        try {
+            return Double.parseDouble(e);
+        } catch(Exception ex) {
+            return Double.NEGATIVE_INFINITY;
         }
     }
     

@@ -30,7 +30,7 @@ public class DeterministicTaskInputFactory extends AbstractTaskInputFactory {
     @Override
     protected TaskInput extract(GWFFile file, int minWidth, int maxWidth, DistributionFactory factory) {
         double d[][] = file.getIncome(minWidth, maxWidth);
-        double m = file.getMaxIncomeTime();
+        double m = file.getLastEvent();
         if(cycle > 0) {
             double mm = Math.ceil(m / cycle) * cycle;
             double ad = mm - m + file.getShift();
@@ -43,16 +43,13 @@ public class DeterministicTaskInputFactory extends AbstractTaskInputFactory {
         boolean norm = true;
         if(hazard == null || hazard) {
             double h[] = hazard == null ? file.getHazard(true) : file.getHazard(norm, minWidth, maxWidth);
-            double last = 0.0, weight = 0.0;
+            double weight = 0.0, last = 0.0;
             for(int i = 0; i < d.length; i++) {
                 weight += SWFFile.getWeight(h, file.getStep(), last, d[i][0]);
                 last = d[i][0];
                 d[i][0] = weight;
             }
-            last = file.getMaxIncomeTime();
-            weight += last < m ? 
-                    + SWFFile.getWeight(h, file.getStep(), last, m) :
-                    - SWFFile.getWeight(h, file.getStep(), m, last) ;
+            weight += SWFFile.getWeight(h, file.getStep(), last, m);
             return new HazardTaskInput(
                     new DeterministicTaskInput(d, weight), 
                     h, 

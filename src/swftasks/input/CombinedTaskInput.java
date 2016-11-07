@@ -60,10 +60,8 @@ public class CombinedTaskInput implements TaskInput {
 
     @Override
     public boolean next(Random random) {
-        adjustNull(random);
-        if (!has()) {
-            return false;
-        }
+        if(adjustNull(random)) 
+            return has();
         TaskInput input = inputs.poll();
         input.next(random);
         inputs.add(input);
